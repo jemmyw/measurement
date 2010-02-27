@@ -6,6 +6,10 @@
 
 * sudo gem install measurement
 
+== DOCUMENTATION:
+
+* http://rdoc.info/projects/jemmyw/measurement
+
 == EXAMPLE:
 
   require 'measurement/length'
