@@ -24,8 +24,8 @@ module Measurement
       fetch_scale(scale).from(amount)
     end
   
-    def self.convert(amount, scale = nil)
-      fetch_scale(scale).convert(amount)
+    def self.to(amount, scale = nil)
+      fetch_scale(scale).to(amount)
     end
   
     def self.format(amount, scale = nil, precision = 2)
@@ -45,7 +45,7 @@ module Measurement
     end
   
     def as(scale)
-      self.class.convert(@amount, scale)
+      self.class.to(@amount, scale)
     end
   
     def to_s(scale = nil, precision = 2)
@@ -55,7 +55,7 @@ module Measurement
         strs = []
     
         while scale = scales.shift
-          n_in = self.class.convert(amount, scale.to_sym)
+          n_in = self.class.to(amount, scale.to_sym)
           n_in = n_in.floor unless scales.empty?        
           n_out = self.class.from(n_in, scale.to_sym)
           amount -= self.class.from(n_in, scale.to_sym)

@@ -4,7 +4,20 @@ describe Measurement::Conversion do
   describe '#instance methods' do
     before do
       @unit = mock(:unit, :add_conversion => nil, :class_eval => nil)
-      @conversion = Measurement::Conversion.new(@unit, 150.0, :test)
+      @conversion = Measurement::Conversion.new(@unit, 150.0, :test, :other)
+    end
+    
+    describe '#initialize' do
+      it 'should call unit add_conversion for test and other' do
+        @unit.should_receive(:add_conversion).with(:test, anything)
+        @unit.should_receive(:add_conversion).with(:other, anything)
+        @conversion = Measurement::Conversion.new(@unit, 150.0, :test, :other)
+      end
+      
+      %w(test other).each do |method|
+        it "should add in_#{method} method"
+        it "should add as_#{method} method"
+      end
     end
     
     describe '#from' do
