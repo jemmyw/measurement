@@ -31,5 +31,5 @@ describe Length do
         Length.parse('10giglygoops')
       end.should raise_error(Measurement::NoScaleFoundException)
     end
-  end
+  end  
 end
