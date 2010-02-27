@@ -10,11 +10,16 @@ module Measurement
   # Example:
   #
   #   class Length < Measurement::Base
-  #     base :metres, :suffix => 'm'
+  #     base :metre, :metres, :suffix => 'm'
   #     unit 0.3048, :feet, :foot, :suffix => "'"
   #   end
   #   
   #   Length.new(10).in_feet => 32.8083989501312
+  #
+  # Extending an existing measurement:
+  #
+  # Length.unit 2000, :quint, :qt, :suffix => 'qt'
+  # Length.new(10).to_s(:qt, 3) => 0.005qt
   #
   class Base
     # Define the base measurement unit. This method accepts
@@ -24,10 +29,14 @@ module Measurement
     # Example, defining a base unit for weights:
     #
     #   class Weight < Measurement::Base
-    #     base :grams, :suffix => 'g'
+    #     base :gram, :grams, :suffix => 'g'
     #   end
     #
     #   Weight.new(1).to_s => "1g"
+    #
+    # The base unit should only be set once because all
+    # other units in this measurement are based off the
+    # base unit.
     #
     def self.base(*args)
       if args.any?
@@ -101,7 +110,12 @@ module Measurement
     #
     # Examples:
     #   Length.parse("180cm").in_cm => 180
-    #   Length.parse("10m 11cm 12mm").in_metres => 10.0112
+    #   Length.parse("10m 11cm 12mm").in_metres => 10.122
+    #
+    # If a valid unit cannot be found an error is raised:
+    #
+    #   Weight.parse("180cm") => Measurement::NoScaleException
+    #
     def self.parse(string)
       string = string.dup
       base_amount = 0.0
@@ -132,19 +146,32 @@ module Measurement
       @amount = self.class.from(amount, scale)
     end
   
+    # The base unit as an integer
     def to_i
       @amount.to_i
     end
   
+    # The base unit as a float
     def to_f
       @amount.to_f
     end
   
-    def as(scale)
-      self.class.to(@amount, scale)
+    # This measurement converted to the specified unit.
+    #
+    # Example:
+    #
+    #   Length.new(10).as(:feet) => 32.8083989501312
+    #
+    # This method can also be called using helper methods:
+    #
+    #   Length.new(10).in_feet
+    #   Length.new(10).as_feet
+    #
+    def as(unit)
+      self.class.to(@amount, unit)
     end
     
-    def method_missing(method, *args)
+    def method_missing(method, *args) # :nodoc:
       if method.to_s =~ /^(as|in)_(.*)/
         scale = $2
         if scale =~ /and/
@@ -157,23 +184,43 @@ module Measurement
       end
     end
   
-    def to_s(scale = nil, precision = 2)
-      if scale.to_s =~ /_and_/
-        scales = scale.to_s.split('_and_')
+    # Format the measurement and return as a string. 
+    # This will format using the base unit if no unit
+    # is specified.
+    #
+    # Example:
+    #
+    #   Length.new(1.8034).to_s(:feet) => 6'
+    #
+    # Multiple units can be specified allowing for a
+    # more naturally formatted measurement. For example:
+    #
+    #   Length.new(1.8034).to_s(:feet_and_inches) => 5' 11"
+    #
+    # Naturally formatted measurements can be returned using
+    # shorthand functions:
+    #
+    #   Length.new(1.8034).in_feet_and_inches => 5' 11"
+    #
+    # A precision can be specified, otherwise the measurement
+    # is rounded to the nearest integer.
+    def to_s(unit = nil, precision = 0)
+      if unit.to_s =~ /_and_/
+        units = unit.to_s.split('_and_')
         amount = @amount
         strs = []
     
-        while scale = scales.shift
-          n_in = self.class.to(amount, scale.to_sym)
-          n_in = n_in.floor unless scales.empty?        
-          n_out = self.class.from(n_in, scale.to_sym)
-          amount -= self.class.from(n_in, scale.to_sym)
-          strs << self.class.format(n_out, scale.to_sym, 0)
+        while unit = units.shift
+          n_in = self.class.to(amount, unit.to_sym)
+          n_in = n_in.floor unless units.empty?        
+          n_out = self.class.from(n_in, unit.to_sym)
+          amount -= self.class.from(n_in, unit.to_sym)
+          strs << self.class.format(n_out, unit.to_sym, 0)
         end
     
         strs.join(' ')
       else
-        self.class.format(@amount, scale, precision)
+        self.class.format(@amount, unit, precision)
       end
     end
     alias_method :format, :to_s

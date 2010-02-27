@@ -2,8 +2,6 @@
 
 * http://github.com/jemmyw/measurement
 
-== DESCRIPTION
-
 == INSTALL:
 
 * sudo gem install measurement
