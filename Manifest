@@ -1,6 +1,7 @@
 CHANGELOG
 LICENSE
 Manifest
+README.rdoc
 Rakefile
 lib/measurement.rb
 lib/measurement/conversion.rb
