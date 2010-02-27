@@ -47,6 +47,14 @@ module Measurement
     def as(scale)
       self.class.to(@amount, scale)
     end
+    
+    def method_missing(method, *args)
+      if method.to_s =~ /and/ && method.to_s =~ /(as|in)_(.*)/
+        to_s($2, *args)
+      else
+        super
+      end
+    end
   
     def to_s(scale = nil, precision = 2)
       if scale.to_s =~ /_and_/

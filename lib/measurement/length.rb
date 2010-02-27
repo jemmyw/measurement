@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'measurement')
+require File.join(File.dirname(__FILE__), '..', 'measurement')
 
 class Length < Measurement::Base
   base :cm, :suffix => 'cm'
