@@ -1,12 +1,14 @@
 module Measurement
   class Conversion
+    attr_reader :names
+    
     def initialize(unit, scale, *args)
       @options = args.last.is_a?(Hash) ? args.pop : {}
       @names = args
       @scale = scale
       @unit = unit
     
-      @names.each do |name|
+      names.each do |name|
         @unit.add_conversion(name, self)
       end
     
@@ -14,7 +16,7 @@ module Measurement
     end
   
     def define_methods
-      @names.each do |name|
+      names.each do |name|
         @unit.class_eval %Q{
           def in_#{name}
             as(:#{name})

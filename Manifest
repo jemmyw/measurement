@@ -2,8 +2,8 @@ CHANGELOG
 LICENSE
 Manifest
 Rakefile
-lib/conversion.rb
 lib/measurement.rb
+lib/measurement/conversion.rb
 lib/measurement/length.rb
 lib/measurement/weight.rb
 spec/lib/conversion_spec.rb

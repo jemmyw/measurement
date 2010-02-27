@@ -1,6 +1,8 @@
-require File.join(File.dirname(__FILE__), 'conversion')
+require File.join(File.dirname(__FILE__), 'measurement', 'conversion')
 
 module Measurement
+  class NoScaleFoundException < Exception; end
+  
   class Base
     @@conversions = {}
   
@@ -19,6 +21,10 @@ module Measurement
     def self.fetch_scale(scale = nil)
       scale ? @@conversions[scale] : @@base
     end
+    
+    def self.find_scale(scale)
+      
+    end
   
     def self.from(amount, scale)
       fetch_scale(scale).from(amount)
@@ -30,6 +36,32 @@ module Measurement
   
     def self.format(amount, scale = nil, precision = 2)
       fetch_scale(scale).format(amount, precision)
+    end
+    
+    def self.parse(string)
+      string = string.dup
+      base_amount = 0.0
+      
+      while string =~ /(\d+(\.\d+)?)([^\d]*)/
+        amount = $1.to_f
+        scale = $3 && $3.strip
+        
+        if scale && scale.length > 0
+          scale = find_scale(scale)
+          
+          if scale.nil?
+            raise NoScaleFoundException.new(scale)
+          else
+            base_amount += scale.from(amount)
+          end
+        else
+          base_amount += amount
+        end
+        
+        string.sub!(/(\d+(\.\d+)?)([^\d]*)/, '')
+      end
+      
+      self.new(base_amount)
     end
   
     def initialize(amount = 0, scale = nil)

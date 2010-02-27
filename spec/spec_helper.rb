@@ -1,3 +1,3 @@
 require 'lib/measurement'
-require 'lib/length'
-require 'lib/weight'
+require 'lib/measurement/length'
+require 'lib/measurement/weight'
