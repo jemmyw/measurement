@@ -4,11 +4,17 @@ module Measurement
   class NoScaleFoundException < Exception; end
   
   class Base
-    @@conversions = []
-  
     def self.base(*args)
-      @@base = Conversion.new(1.0, *args)
-      add_conversion(@@base)
+      if args.any?
+        @base = Conversion.new(1.0, *args)
+        add_conversion(@base)
+      else
+        @base
+      end
+    end
+    
+    def self.conversions
+      @conversions ||= []
     end
   
     def self.conversion(scale, *args)
@@ -16,17 +22,17 @@ module Measurement
     end
   
     def self.add_conversion(conversion)
-      @@conversions << conversion
+      conversions << conversion
     end
   
     def self.fetch_scale(scale = nil)
-      scale.nil? ? @@base : @@conversions.detect do |conversion|
+      scale.nil? ? base : conversions.detect do |conversion|
         conversion.has_name?(scale)
       end
     end
     
     def self.find_scale(scale)
-      @@conversions.detect do |conversion|
+      conversions.detect do |conversion|
         conversion.has_name?(scale) ||
           conversion.suffix == scale
       end
