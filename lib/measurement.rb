@@ -4,26 +4,32 @@ module Measurement
   class NoScaleFoundException < Exception; end
   
   class Base
-    @@conversions = {}
+    @@conversions = []
   
     def self.base(*args)
-      @@base = Conversion.new(self, 1.0, *args)
+      @@base = Conversion.new(1.0, *args)
+      add_conversion(@@base)
     end
   
     def self.conversion(scale, *args)
-      Conversion.new(self, scale, *args)
+      add_conversion(Conversion.new(scale, *args))
     end
   
-    def self.add_conversion(name, conversion)
-      @@conversions[name] = conversion
+    def self.add_conversion(conversion)
+      @@conversions << conversion
     end
   
     def self.fetch_scale(scale = nil)
-      scale ? @@conversions[scale] : @@base
+      scale.nil? ? @@base : @@conversions.detect do |conversion|
+        conversion.has_name?(scale)
+      end
     end
     
     def self.find_scale(scale)
-      
+      @@conversions.detect do |conversion|
+        conversion.has_name?(scale) ||
+          conversion.suffix == scale
+      end
     end
   
     def self.from(amount, scale)
@@ -81,8 +87,13 @@ module Measurement
     end
     
     def method_missing(method, *args)
-      if method.to_s =~ /and/ && method.to_s =~ /(as|in)_(.*)/
-        to_s($2, *args)
+      if method.to_s =~ /^(as|in)_(.*)/
+        scale = $2
+        if scale =~ /and/
+          to_s(scale, *args)
+        else
+          as(scale.to_sym, *args)
+        end
       else
         super
       end
@@ -107,5 +118,6 @@ module Measurement
         self.class.format(@amount, scale, precision)
       end
     end
+    alias_method :format, :to_s
   end
 end

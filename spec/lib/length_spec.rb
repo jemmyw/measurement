@@ -12,12 +12,12 @@ describe Length do
     
     it 'should parse in the unit specified' do
       Length.parse('32cm').to_f.should == 0.32
-      Length.parse('32cm').to_s(:cm).should == '32cm'
+      Length.parse('32cm').to_s(:cm, 0).should == '32cm'
     end
     
     it 'should parse multiple units' do
       Length.parse('32cm 5mm').to_f.should == 0.325
-      Length.parse('32cm 5mm').to_s(:cm, 0).should == '33cm'
+      Length.parse('32cm 5mm').to_s(:cm, 0).should == '32cm'
       Length.parse('32cm 5mm').to_s(:cm_and_mm).should == '32cm 5mm'
     end
     
