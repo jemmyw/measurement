@@ -4,12 +4,12 @@ Manifest
 README.rdoc
 Rakefile
 lib/measurement.rb
-lib/measurement/conversion.rb
 lib/measurement/length.rb
+lib/measurement/unit.rb
 lib/measurement/weight.rb
-spec/lib/conversion_spec.rb
 spec/lib/length_spec.rb
 spec/lib/measurement_spec.rb
+spec/lib/unit_spec.rb
 spec/lib/weight_spec.rb
 spec/spec.opts
 spec/spec_helper.rb

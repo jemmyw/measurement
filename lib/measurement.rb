@@ -95,7 +95,13 @@ module Measurement
     end
     
     # Parse a string containing this measurement. The string
-    # can use any of the defined units
+    # can use any of the defined units. This function will look
+    # for numbers in the string, followed by text. The text
+    # can be any unit name or suffix.
+    #
+    # Examples:
+    #   Length.parse("180cm").in_cm => 180
+    #   Length.parse("10m 11cm 12mm").in_metres => 10.0112
     def self.parse(string)
       string = string.dup
       base_amount = 0.0
