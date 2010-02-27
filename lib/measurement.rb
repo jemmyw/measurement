@@ -1,55 +1,101 @@
-require File.join(File.dirname(__FILE__), 'measurement', 'conversion')
+require File.join(File.dirname(__FILE__), 'measurement', 'unit')
 
 module Measurement
-  class NoScaleFoundException < Exception; end
-  
+  class NoUnitFoundException < Exception; end
+
+  # The Measurement::Base class provides a basis for types of
+  # measurement. For example, length or weight. It should
+  # be subclassed and not used directly.
+  #
+  # Example:
+  #
+  #   class Length < Measurement::Base
+  #     base :metres, :suffix => 'm'
+  #     unit 0.3048, :feet, :foot, :suffix => "'"
+  #   end
+  #   
+  #   Length.new(10).in_feet => 32.8083989501312
+  #
   class Base
+    # Define the base measurement unit. This method accepts
+    # a list of names for the base measurement, followed
+    # by the standard unit options. See #unit
+    #
+    # Example, defining a base unit for weights:
+    #
+    #   class Weight < Measurement::Base
+    #     base :grams, :suffix => 'g'
+    #   end
+    #
+    #   Weight.new(1).to_s => "1g"
+    #
     def self.base(*args)
       if args.any?
-        @base = Conversion.new(1.0, *args)
-        add_conversion(@base)
+        @base = Unit.new(1.0, *args)
+        add_unit(@base)
       else
         @base
       end
     end
     
-    def self.conversions
-      @conversions ||= []
+    def self.units # :nodoc:
+      @units ||= []
     end
   
-    def self.conversion(scale, *args)
-      add_conversion(Conversion.new(scale, *args))
+    # Define a unit of measurement. This must be a number based on
+    # the #base measurement unit.
+    # Takes a scaling number, a list of names and finally a
+    # hash of options.
+    #
+    # For example, if the base unit is metres, then defining the
+    # unit for centimetres would be as follows:
+    #
+    #   unit 0.01, :centimetre, :centimetres, :cm, :suffix => 'cm'
+    #
+    # Here a centimetre is defined as one hundredth of a metre. The
+    # different name usages for centimetre are specified (for parsing, see #parse),
+    # and the suffix is set to 'cm'
+    #
+    # Available options:
+    #
+    # * <tt>prefix</tt> - A prefix to use when formatting the unit.
+    # * <tt>suffix</tt> - A suffix to use when formatting the unit.
+    #
+    def self.unit(scale, *args)
+      add_unit(Unit.new(scale, *args))
     end
   
-    def self.add_conversion(conversion)
-      conversions << conversion
+    def self.add_unit(unit) # :nodoc:
+      units << unit
     end
   
-    def self.fetch_scale(scale = nil)
-      scale.nil? ? base : conversions.detect do |conversion|
-        conversion.has_name?(scale)
+    def self.fetch_scale(scale = nil) # :nodoc:
+      scale.nil? ? base : units.detect do |unit|
+        unit.has_name?(scale)
       end
     end
     
-    def self.find_scale(scale)
-      conversions.detect do |conversion|
-        conversion.has_name?(scale) ||
-          conversion.suffix == scale
+    def self.find_scale(scale) # :nodoc:
+      units.detect do |unit|
+        unit.has_name?(scale) ||
+          unit.suffix == scale
       end
     end
   
-    def self.from(amount, scale)
+    def self.from(amount, scale) # :nodoc:
       fetch_scale(scale).from(amount)
     end
   
-    def self.to(amount, scale = nil)
+    def self.to(amount, scale = nil) # :nodoc:
       fetch_scale(scale).to(amount)
     end
   
-    def self.format(amount, scale = nil, precision = 2)
+    def self.format(amount, scale = nil, precision = 2) #:nodoc:
       fetch_scale(scale).format(amount, precision)
     end
     
+    # Parse a string containing this measurement. The string
+    # can use any of the defined units
     def self.parse(string)
       string = string.dup
       base_amount = 0.0
@@ -62,7 +108,7 @@ module Measurement
           scale = find_scale(scale)
           
           if scale.nil?
-            raise NoScaleFoundException.new(scale)
+            raise NoUnitFoundException.new(scale)
           else
             base_amount += scale.from(amount)
           end

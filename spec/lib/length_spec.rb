@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe Length do
-  it 'should have 10 conversions' do
-    Length.conversions.size.should == 10
+  it 'should have 10 units' do
+    Length.units.size.should == 10
   end
   
   it 'should use metres as a base' do

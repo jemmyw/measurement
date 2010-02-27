@@ -29,7 +29,7 @@ describe Measurement::Base do
     it 'should raise a NoScaleFoundException if there is no scale matching the one passed' do
       lambda do
         Length.parse('10giglygoops')
-      end.should raise_error(Measurement::NoScaleFoundException)
+      end.should raise_error(Measurement::NoUnitFoundException)
     end
   end
   

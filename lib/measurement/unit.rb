@@ -1,5 +1,5 @@
 module Measurement
-  class Conversion
+  class Unit
     attr_reader :names
     
     def initialize(scale, *args)
