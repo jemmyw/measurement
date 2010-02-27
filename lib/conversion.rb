@@ -31,12 +31,12 @@ module Measurement
       amount.to_f * @scale
     end
   
-    def convert(amount)
+    def to(amount)
       amount.to_f / @scale
     end
   
     def format(amount, precision = 2)
-      prefix + ("%.#{precision}f" % convert(amount)) + suffix
+      prefix + ("%.#{precision}f" % to(amount)) + suffix
     end
   
     private
