@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), 'measurement', 'unit')
+require File.join(File.dirname(__FILE__), 'measurement', 'unit_group')
 
 module Measurement
   class NoUnitFoundException < Exception
@@ -62,21 +63,23 @@ module Measurement
     end
     
     def self.register_measurement
-      method_name = name.gsub(/\s/, '_').gsub(/.[A-Z]/) do |s|
-        s[0,1] + '_' + s[1,1].downcase
-      end.downcase
+      if name && name.length > 0
+        method_name = name.gsub(/\s/, '_').gsub(/.[A-Z]/) do |s|
+          s[0,1] + '_' + s[1,1].downcase
+        end.downcase
       
-      [Fixnum, Float].each do |klass|
-        klass.class_eval %Q{
-        def to_#{method_name}
-          #{name}.new(self)
-        end}
+        [Fixnum, Float].each do |klass|
+          klass.class_eval %Q{
+          def to_#{method_name}
+            #{name}.new(self)
+          end}
+        end
+      
+        String.class_eval %Q{
+          def to_#{method_name}
+            #{name}.parse(self)
+          end}
       end
-      
-      String.class_eval %Q{
-        def to_#{method_name}
-          #{name}.parse(self)
-        end}
     end
     
     def self.units # :nodoc:
@@ -101,6 +104,7 @@ module Measurement
     #
     # * <tt>prefix</tt> - A prefix to use when formatting the unit.
     # * <tt>suffix</tt> - A suffix to use when formatting the unit.
+    # * <tt>group</tt> - A group that can be used when formatting to combine the unit formats.
     #
     def self.unit(unit, *args)
       add_unit(Unit.new(unit, *args))
@@ -109,14 +113,29 @@ module Measurement
     def self.add_unit(unit) # :nodoc:
       units << unit
     end
+    
+    def self.fetch_group(scale) # :nodoc:
+      scale = scale.to_sym
+      @groups ||= {}
+      @groups[scale] ||= begin
+        group = units.inject([]) do |m,n|
+          m << n if n.in_group?(scale)
+          m
+        end
+      
+        if group.any?
+          UnitGroup.new(group)
+        end
+      end
+    end
   
-    def self.fetch_scale(scale = nil) # :nodoc:
+    def self.fetch_scale(scale = nil, raise_error = true) # :nodoc:
       unit = (scale.nil? ? base : units.detect do |unit|
         unit.has_name?(scale.to_sym)
-      end)
+      end) || fetch_group(scale)
       
       unless unit
-        raise NoUnitFoundException.new(scale)
+        raise NoUnitFoundException.new(scale) if raise_error
       else
         unit
       end
@@ -252,25 +271,22 @@ module Measurement
     #
     #   Length.new(1.8034).in_feet_and_inches => 5' 11"
     #
+    # The unit group can also be specified to get a similar effect:
+    #
+    #   Length.new(1.8034).to_s(:metric) => '1m 80cm 3mm'
+    #
     # A precision can be specified, otherwise the measurement
     # is rounded to the nearest integer.
     def to_s(unit = nil, precision = 0)
       if unit.to_s =~ /_and_/
-        units = unit.to_s.split('_and_')
-        amount = @amount
-        strs = []
-    
-        while unit = units.shift
-          n_in = self.class.to(amount, unit.to_sym)
-          n_in = n_in.floor unless units.empty?        
-          n_out = self.class.from(n_in, unit.to_sym)
-          amount -= self.class.from(n_in, unit.to_sym)
-          strs << self.class.format(n_out, unit.to_sym, 0)
+        units = unit.to_s.split('_and_').map do |unit|
+          self.class.fetch_scale(unit)
         end
-    
-        strs.join(' ')
+        
+        UnitGroup.new(units).format(@amount, precision)
       else
-        self.class.format(@amount, unit, precision)
+        unit = self.class.fetch_scale(unit)
+        unit.format(@amount, precision)
       end
     end
     alias_method :format, :to_s

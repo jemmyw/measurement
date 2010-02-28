@@ -21,14 +21,14 @@ require File.join(File.dirname(__FILE__), '..', 'measurement')
 #   puts Length.parse('180.34cm').in_feet_and_inches => 5' 11"
 #
 class Length < Measurement::Base
-  base :metre, :metres, :suffix => 'm'
-  unit 1000, :kilometre, :kilometres, :km, :suffix => 'km'
-  unit 0.01, :centimetre, :centimetres, :cm, :suffix => 'cm'
-  unit 0.001, :millimetre, :mm, :suffix => 'mm'
+  base :metre, :metres, :suffix => 'm', :group => :metric
+  unit 1000, :kilometre, :kilometres, :km, :suffix => 'km', :group => :metric
+  unit 0.01, :centimetre, :centimetres, :cm, :suffix => 'cm', :group => :metric
+  unit 0.001, :millimetre, :mm, :suffix => 'mm', :group => :metric
   
-  unit 0.0254, :inch, :inches, :suffix => '"'
-  unit 0.3048, :feet, :foot, :suffix => "'"
-  unit 1609.34, :mile, :miles, :suffix => ' miles'
+  unit 0.0254, :inch, :inches, :suffix => '"', :group => :imperial
+  unit 0.3048, :feet, :foot, :suffix => "'", :group => :imperial
+  unit 1609.34, :mile, :miles, :suffix => ' miles', :group => :imperial
   unit 0.1016, :hand, :hands, :suffix => ' hands'
   
   unit 299792458, :light_seconds, :suffix => ' light seconds'

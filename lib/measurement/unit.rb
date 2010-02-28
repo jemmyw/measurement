@@ -1,15 +1,26 @@
 module Measurement
   class Unit
-    attr_reader :names
+    include Comparable
+    
+    attr_reader :names, :scale, :groups
     
     def initialize(scale, *args)
       @options = args.last.is_a?(Hash) ? args.pop : {}
       @names = args
       @scale = scale
+      @groups = [@options[:group]].flatten
+    end
+    
+    def <=>(anOther)
+      scale <=> anOther.scale
     end
     
     def has_name?(name)
       names.include?(name)
+    end
+    
+    def in_group?(group)
+      groups.include?(group.to_sym)
     end
   
     def from(amount)

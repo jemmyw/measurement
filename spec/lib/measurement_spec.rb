@@ -105,4 +105,41 @@ describe Measurement::Base do
       length.in_cm_and_mm.should == length.to_s(:cm_and_mm)
     end
   end
+  
+  describe '#to_s' do
+    before do
+      @klass = Class.new(Measurement::Base)
+      @klass.base :grams, :group => :metric, :suffix => 'g'
+      @klass.unit 1000, :kilograms, :group => :metric, :suffix => 'kg'
+      @instance = @klass.new(1500)
+    end
+    
+    it 'should return the base unit format if no unit is specified' do
+      @instance.to_s.should == '1500g'
+    end
+    
+    it 'should return the unit format if a unit is specified' do
+      @instance.to_s(:kilograms).should == '2kg'
+    end
+    
+    it 'should return the unit format with precision if specified' do
+      @instance.to_s(:kilograms, 1).should == '1.5kg'
+    end
+    
+    it 'should return the combined unit formats if separated by and' do
+      @instance.to_s(:kilograms_and_grams).should == '1kg 500g'
+    end
+    
+    it 'should return the combined unit formats if a group is specified' do
+      @instance.to_s(:metric).should == '1kg 500g'
+    end
+    
+    it 'should not return any lower bound measurments if they are 0' do
+      @klass.new(10000).to_s(:metric).should == '10kg'
+    end
+    
+    it 'should not return any upper bound measurements if they are 0' do
+      @klass.new(10).to_s(:metric).should == '10g'
+    end
+  end
 end
