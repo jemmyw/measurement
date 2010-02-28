@@ -22,6 +22,8 @@ module Measurement
   # Length.new(10).to_s(:qt, 3) => 0.005qt
   #
   class Base
+    include Comparable
+    
     # Define the base measurement unit. This method accepts
     # a list of names for the base measurement, followed
     # by the standard unit options. See #unit
@@ -39,12 +41,31 @@ module Measurement
     # base unit.
     #
     def self.base(*args)
-      if args.any?
+      if args.any? || !@base
         @base = Unit.new(1.0, *args)
         add_unit(@base)
+        register_measurement
       else
         @base
       end
+    end
+    
+    def self.register_measurement
+      method_name = name.gsub(/\s/, '_').gsub(/.[A-Z]/) do |s|
+        s[0,1] + '_' + s[1,1].downcase
+      end.downcase
+      
+      [Fixnum, Float].each do |klass|
+        klass.class_eval %Q{
+        def to_#{method_name}
+          #{name}.new(self)
+        end}
+      end
+      
+      String.class_eval %Q{
+        def to_#{method_name}
+          #{name}.parse(self)
+        end}
     end
     
     def self.units # :nodoc:
@@ -154,6 +175,18 @@ module Measurement
     # The base unit as a float
     def to_f
       @amount.to_f
+    end
+    
+    def <=>(anOther)
+      to_f <=> anOther.to_f
+    end
+    
+    %w(+ - / *).each do |operator|
+      class_eval %Q{
+        def #{operator}(anOther)
+          self.class.new(self.to_f #{operator} anOther.to_f)
+        end
+      }
     end
   
     # This measurement converted to the specified unit.

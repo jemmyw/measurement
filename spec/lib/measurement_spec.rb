@@ -1,6 +1,22 @@
 require 'spec_helper'
 
 describe Measurement::Base do
+  describe '::base' do
+    it 'should define to_measurement on Fixnum and Float' do
+      Length
+      1.to_length.should be_a(Length)
+      1.to_length.to_f.should == 1.0
+      1.5.to_length.should be_a(Length)
+      1.5.to_length.to_f.should == 1.5
+    end
+    
+    it 'should define to_measurement on String' do
+      Length
+      "10cm".to_length.should be_a(Length)
+      "10cm".to_length.to_s(:metre, 1).should == "0.1m"
+    end
+  end
+  
   describe '::parse' do
     it 'should parse in the base unit if no unit is specified' do
       Length.parse('113').to_f.should == 113.0
@@ -30,6 +46,30 @@ describe Measurement::Base do
       lambda do
         Length.parse('10giglygoops')
       end.should raise_error(Measurement::NoUnitFoundException)
+    end
+  end
+  
+  describe 'operators' do
+    before do
+      @length_1 = Length.new(1)
+      @length_2 = Length.new(2)
+    end
+    
+    %w(+ - / *).each do |operator|
+      it 'should return a new object of the same type' do
+        @length_1.send(operator, @length_2).should be_a(Length)
+      end
+      
+      it 'should perform the operator' do
+        @value = @length_1.to_f.send(operator, @length_2.to_f)
+        @length_1.send(operator, @length_2).to_f.should == @value
+      end
+    end
+  end
+  
+  describe '#<=>' do
+    it 'should return the difference between the objects' do
+      (Length.new(1) <=> Length.new(2)).should == (1.0 <=> 2.0)
     end
   end
   
