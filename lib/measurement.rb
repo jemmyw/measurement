@@ -91,8 +91,8 @@ module Measurement
     # * <tt>prefix</tt> - A prefix to use when formatting the unit.
     # * <tt>suffix</tt> - A suffix to use when formatting the unit.
     #
-    def self.unit(scale, *args)
-      add_unit(Unit.new(scale, *args))
+    def self.unit(unit, *args)
+      add_unit(Unit.new(unit, *args))
     end
   
     def self.add_unit(unit) # :nodoc:
@@ -112,16 +112,16 @@ module Measurement
       end
     end
   
-    def self.from(amount, scale) # :nodoc:
-      fetch_scale(scale).from(amount)
+    def self.from(amount, unit) # :nodoc:
+      fetch_scale(unit).from(amount)
     end
   
-    def self.to(amount, scale = nil) # :nodoc:
-      fetch_scale(scale).to(amount)
+    def self.to(amount, unit = nil) # :nodoc:
+      fetch_scale(unit).to(amount)
     end
   
-    def self.format(amount, scale = nil, precision = 2) #:nodoc:
-      fetch_scale(scale).format(amount, precision)
+    def self.format(amount, unit = nil, precision = 2) #:nodoc:
+      fetch_scale(unit).format(amount, precision)
     end
     
     # Parse a string containing this measurement. The string
@@ -135,7 +135,7 @@ module Measurement
     #
     # If a valid unit cannot be found an error is raised:
     #
-    #   Weight.parse("180cm") => Measurement::NoScaleException
+    #   Weight.parse("180cm") => Measurement::NoUnitException
     #
     def self.parse(string)
       string = string.dup
@@ -143,15 +143,15 @@ module Measurement
       
       while string =~ /(\d+(\.\d+)?)([^\d]*)/
         amount = $1.to_f
-        scale = $3 && $3.strip
+        unit = $3 && $3.strip
         
-        if scale && scale.length > 0
-          scale = find_scale(scale)
+        if unit && unit.length > 0
+          unit = find_scale(unit)
           
-          if scale.nil?
-            raise NoUnitFoundException.new(scale)
+          if unit.nil?
+            raise NoUnitFoundException.new(unit)
           else
-            base_amount += scale.from(amount)
+            base_amount += unit.from(amount)
           end
         else
           base_amount += amount
@@ -163,8 +163,8 @@ module Measurement
       self.new(base_amount)
     end
   
-    def initialize(amount = 0, scale = nil)
-      @amount = self.class.from(amount, scale)
+    def initialize(amount = 0, unit = nil)
+      @amount = self.class.from(amount, unit)
     end
   
     # The base unit as an integer
@@ -206,11 +206,11 @@ module Measurement
     
     def method_missing(method, *args) # :nodoc:
       if method.to_s =~ /^(as|in)_(.*)/
-        scale = $2
-        if scale =~ /and/
-          to_s(scale, *args)
+        unit = $2
+        if unit =~ /and/
+          to_s(unit, *args)
         else
-          as(scale.to_sym, *args)
+          as(unit.to_sym, *args)
         end
       else
         super
