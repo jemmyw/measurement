@@ -1,7 +1,18 @@
 require File.join(File.dirname(__FILE__), 'measurement', 'unit')
 
 module Measurement
-  class NoUnitFoundException < Exception; end
+  class NoUnitFoundException < Exception
+    attr_reader :unit
+    
+    def initialize(unit)
+      @unit = unit
+      super
+    end
+    
+    def to_s
+      "No unit found: #{@unit}"
+    end
+  end
 
   # The Measurement::Base class provides a basis for types of
   # measurement. For example, length or weight. It should
@@ -100,8 +111,14 @@ module Measurement
     end
   
     def self.fetch_scale(scale = nil) # :nodoc:
-      scale.nil? ? base : units.detect do |unit|
+      unit = (scale.nil? ? base : units.detect do |unit|
         unit.has_name?(scale)
+      end)
+      
+      unless unit
+        raise NoUnitFoundException.new(scale)
+      else
+        unit
       end
     end
     
@@ -135,7 +152,7 @@ module Measurement
     #
     # If a valid unit cannot be found an error is raised:
     #
-    #   Weight.parse("180cm") => Measurement::NoUnitException
+    #   Weight.parse("180cm") => Measurement::NoUnitFoundException
     #
     def self.parse(string)
       string = string.dup
