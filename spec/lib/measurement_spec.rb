@@ -17,6 +17,24 @@ describe Measurement::Base do
     end
   end
   
+  describe '::find_scale' do
+    it 'should be able to find the unit by name' do
+      Weight.find_scale(:kilogram).should_not be_nil
+      Weight.find_scale(:kilogram).has_name?(:kilogram).should be_true
+    end
+    it 'should be able to find the unit if the name passed is a string' do
+      Weight.find_scale("kilogram").should_not be_nil
+      Weight.find_scale(:kilogram).has_name?(:kilogram).should be_true
+    end
+    it 'should be able to find the unit by suffix' do
+      Weight.unit 2000, :quit, :qt, :suffix => 'q'
+      Weight.find_scale('q').should_not be_nil
+    end
+    it 'should return nil if no unit is found' do
+      Weight.find_scale('gigboot').should be_nil
+    end
+  end
+  
   describe '::parse' do
     it 'should parse in the base unit if no unit is specified' do
       Length.parse('113').to_f.should == 113.0

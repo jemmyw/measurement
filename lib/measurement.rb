@@ -112,7 +112,7 @@ module Measurement
   
     def self.fetch_scale(scale = nil) # :nodoc:
       unit = (scale.nil? ? base : units.detect do |unit|
-        unit.has_name?(scale)
+        unit.has_name?(scale.to_sym)
       end)
       
       unless unit
@@ -124,8 +124,8 @@ module Measurement
     
     def self.find_scale(scale) # :nodoc:
       units.detect do |unit|
-        unit.has_name?(scale) ||
-          unit.suffix == scale
+        unit.has_name?(scale.to_sym) ||
+          unit.suffix == scale.to_s
       end
     end
   
