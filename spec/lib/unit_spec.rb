@@ -28,6 +28,10 @@ describe Measurement::Unit do
         @unit.format(200,2).should == "1.33"
       end
       
+      it 'should remove the end 0' do
+        @unit.format(255, 2).should == '1.7'
+      end
+      
       it 'should apply the suffix' do
         @unit = Measurement::Unit.new(150.0, :test, :suffix => 'test')
         @unit.format(150, 0).should == "1test"

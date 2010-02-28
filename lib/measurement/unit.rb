@@ -21,7 +21,8 @@ module Measurement
     end
   
     def format(amount, precision = 2)
-      prefix + ("%.#{precision}f" % to(amount)) + suffix
+      number = ("%.#{precision}f" % to(amount)).sub(/(\.\d*)0/, '\1')
+      prefix + number + suffix
     end
   
     def prefix
