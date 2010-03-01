@@ -6,6 +6,7 @@ Rakefile
 lib/measurement.rb
 lib/measurement/length.rb
 lib/measurement/unit.rb
+lib/measurement/unit_group.rb
 lib/measurement/weight.rb
 spec/lib/length_spec.rb
 spec/lib/measurement_spec.rb
