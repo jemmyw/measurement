@@ -169,13 +169,17 @@ module Measurement
     #   Length.parse("180cm").in_cm => 180
     #   Length.parse("10m 11cm 12mm").in_metres => 10.122
     #
+    # If the string does not specify the unit then the base
+    # unit will be used unless a unit is suggested.
+    #
     # If a valid unit cannot be found an error is raised:
     #
     #   Weight.parse("180cm") => Measurement::NoUnitFoundException
     #
-    def self.parse(string)
+    def self.parse(string, suggested_unit = nil)
       string = string.dup
       base_amount = 0.0
+      suggested_unit = suggested_unit ? find_scale(suggested_unit) : base
       
       while string =~ /(\d+(\.\d+)?)([^\d]*)/
         amount = $1.to_f
@@ -190,7 +194,7 @@ module Measurement
             base_amount += unit.from(amount)
           end
         else
-          base_amount += amount
+          base_amount += suggested_unit.from(amount)
         end
         
         string.sub!(/(\d+(\.\d+)?)([^\d]*)/, '')

@@ -9,6 +9,7 @@ module Measurement
     def format(amount, precision = 0)
       units = @units.dup
       strs = []
+      precision = 0 if units.size > 1
       
       while unit = units.shift
         n_in = unit.to(amount)
@@ -19,6 +20,14 @@ module Measurement
       end
       
       strs.join(' ')
+    end
+    
+    def from(amount)
+      @units.first.from(amount)
+    end
+    
+    def to(amount)
+      @units.first.to(amount)
     end
   end
 end

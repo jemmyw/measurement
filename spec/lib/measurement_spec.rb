@@ -40,6 +40,10 @@ describe Measurement::Base do
       Length.parse('113').to_f.should == 113.0
     end
     
+    it 'should parse in the suggest unit if no unit is in the text' do
+      Length.parse('113', :inches).to_f.should == 2.8702
+    end
+    
     it 'should parse floating point numbers' do
       Length.parse('113.43').to_f.should == 113.43
     end
@@ -64,6 +68,26 @@ describe Measurement::Base do
       lambda do
         Length.parse('10giglygoops')
       end.should raise_error(Measurement::NoUnitFoundException)
+    end
+  end
+  
+  describe '#initialize' do
+    before do
+      @klass = Class.new(Measurement::Base)
+      @klass.base :grams
+      @klass.unit 1000, :kilograms, :group => :metric
+    end
+    
+    it 'should initialize to the base value' do
+      @klass.new(1000).to_f.should == 1000.0
+    end
+    
+    it 'should initialize to the specified unit' do
+      @klass.new(1000, :kilograms).to_f.should == 1000000.0
+    end
+    
+    it 'should initialize to the base unit of the specified group' do
+      @klass.new(1000, :metric).to_f.should == 1000000.0
     end
   end
   
