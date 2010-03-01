@@ -177,7 +177,7 @@ module Measurement
     #   Weight.parse("180cm") => Measurement::NoUnitFoundException
     #
     def self.parse(string, suggested_unit = nil)
-      string = string.dup
+      string = string.to_s.dup # Make sure we have a string and duplicate it
       base_amount = 0.0
       suggested_unit = suggested_unit ? find_scale(suggested_unit) : base
       
