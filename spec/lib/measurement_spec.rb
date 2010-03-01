@@ -44,6 +44,10 @@ describe Measurement::Base do
       Length.parse('113', :inches).to_f.should == 2.8702
     end
     
+    it 'should parse the group base unit if the suggest unit is a group and no unit is in the text' do
+      Length.parse('113', :metric).to_f.should == 113.0
+    end
+    
     it 'should parse floating point numbers' do
       Length.parse('113.43').to_f.should == 113.43
     end

@@ -22,9 +22,9 @@ require File.join(File.dirname(__FILE__), '..', 'measurement')
 #
 class Length < Measurement::Base
   base :metre, :metres, :suffix => 'm', :group => :metric
-  unit 1000, :kilometre, :kilometres, :km, :suffix => 'km', :group => :metric
-  unit 0.01, :centimetre, :centimetres, :cm, :suffix => 'cm', :group => :metric
-  unit 0.001, :millimetre, :mm, :suffix => 'mm', :group => :metric
+  unit 1000, :kilometre, :kilometres, :km, :suffix => 'km'
+  unit 0.01, :centimetre, :centimetres, :cm, :suffix => 'cm'
+  unit 0.001, :millimetre, :mm, :suffix => 'mm'
   
   unit 0.0254, :inch, :inches, :suffix => '"', :group => :imperial
   unit 0.3048, :feet, :foot, :suffix => "'", :group => :imperial

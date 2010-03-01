@@ -145,7 +145,7 @@ module Measurement
       units.detect do |unit|
         unit.has_name?(scale.to_sym) ||
           unit.suffix == scale.to_s
-      end
+      end || fetch_group(scale)
     end
   
     def self.from(amount, unit) # :nodoc:

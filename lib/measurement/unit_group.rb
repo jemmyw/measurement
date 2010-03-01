@@ -6,6 +6,10 @@ module Measurement
       @units = units.sort.reverse
     end
     
+    def base
+      @units.first
+    end
+    
     def format(amount, precision = 0)
       units = @units.dup
       strs = []
