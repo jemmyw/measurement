@@ -183,7 +183,7 @@ module Measurement
       
       while string =~ /(\d+(\.\d+)?)([^\d]*)/
         amount = $1.to_f
-        unit = $3 && $3.strip
+        unit = $3 && $3.strip.downcase
         
         if unit && unit.length > 0
           unit = find_scale(unit)

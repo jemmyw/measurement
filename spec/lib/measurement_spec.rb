@@ -68,6 +68,10 @@ describe Measurement::Base do
       Length.parse(%Q{5' 11"}).to_f.should == 1.8034
     end
     
+    it 'should be able to parse units in upper case' do
+      Length.parse('32CM').to_f.should == 0.32
+    end
+    
     it 'should raise a NoScaleFoundException if there is no scale matching the one passed' do
       lambda do
         Length.parse('10giglygoops')
